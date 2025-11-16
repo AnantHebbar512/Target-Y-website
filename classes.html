@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classes - Target Y Live Sessions</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="classes-style.css">
+    <script src='https://meet.jitsi.org/external_api.js'></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <img src="target y real logo.jpg" alt="Target Y Logo" class="logo-img">
+                <span class="logo-text">Target Y</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#features">Features</a></li>
+                <li><a href="classes.html">Classes</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Classes Section -->
+    <section class="classes-hero">
+        <div class="stars"></div>
+        <div class="classes-hero-content">
+            <h1 class="hero-title">Live Classes</h1>
+            <p class="hero-subtitle">Learn Together in Real-Time</p>
+            <p class="hero-description">Interactive live sessions with screen sharing, chat, and more. Perfect for small group learning!</p>
+        </div>
+    </section>
+
+    <!-- Classes Management Section -->
+    <section class="classes-section">
+        <div class="container">
+            <h2 class="section-title">Upcoming Classes</h2>
+            
+            <!-- Create New Class Form -->
+            <div class="create-class-container">
+                <h3>Create a New Class</h3>
+                <form id="classForm">
+                    <div class="form-group">
+                        <input type="text" id="className" placeholder="Class Name (e.g., Web Dev 101)" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="instructorName" placeholder="Instructor Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="topic" placeholder="Topic (e.g., React Basics)" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="datetime-local" id="classDateTime" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="description" placeholder="Class Description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="join-btn">Create Class</button>
+                </form>
+            </div>
+
+            <!-- Classes List -->
+            <div class="classes-list">
+                <h3>Available Classes</h3>
+                <div id="classesContainer" class="classes-grid">
+                    <!-- Classes will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Jitsi Meet Container (Hidden by default) -->
+    <section id="videoSection" class="video-section" style="display: none;">
+        <div class="video-container">
+            <div id="jitsi-container"></div>
+            <div class="class-info">
+                <h2 id="liveClassName"></h2>
+                <p id="liveInstructor"></p>
+                <button class="leave-btn" onclick="leaveClass()">Leave Class</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Target Y - Live Learning Community. All rights reserved.</p>
+    </footer>
+
+    <script src="classes-script.js"></script>
+</body>
+</html>
