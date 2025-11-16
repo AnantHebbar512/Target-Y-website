@@ -6,6 +6,7 @@ let classes = [];
 
 // Load classes from localStorage on page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Classes page loaded');
     loadClasses();
     renderClasses();
     setupFormListener();
@@ -16,30 +17,42 @@ function setupFormListener() {
     const classForm = document.getElementById('classForm');
     if (classForm) {
         classForm.addEventListener('submit', createClass);
+        console.log('Form listener setup complete');
     }
 }
 
 // Create a new class
 function createClass(e) {
     e.preventDefault();
+    
+    const name = document.getElementById('className').value;
+    const instructor = document.getElementById('instructorName').value;
+    const topic = document.getElementById('topic').value;
+    const dateTime = document.getElementById('classDateTime').value;
+    const description = document.getElementById('description').value;
+
+    if (!name || !instructor || !topic || !dateTime) {
+        alert('Please fill all required fields!');
+        return;
+    }
 
     const newClass = {
         id: Date.now(),
-        name: document.getElementById('className').value,
-        instructor: document.getElementById('instructorName').value,
-        topic: document.getElementById('topic').value,
-        dateTime: document.getElementById('classDateTime').value,
-        description: document.getElementById('description').value,
-        roomName: `target-y-class-${Date.now()}`
+        name: name,
+        instructor: instructor,
+        topic: topic,
+        dateTime: dateTime,
+        description: description,
+        roomName: 'target-y-class-' + Date.now()
     };
 
     classes.push(newClass);
     saveClasses();
     renderClasses();
-
-    // Reset form
     document.getElementById('classForm').reset();
-    alert(`✅ Class "${newClass.name}" created! Students can now join.`);
+    
+    console.log('Class created:', newClass);
+    alert(`✅ Class "${newClass.name}" created successfully! Share the link to invite students.`);
 }
 
 // Save classes to localStorage
@@ -51,11 +64,17 @@ function saveClasses() {
 function loadClasses() {
     const saved = localStorage.getItem('targetYClasses');
     classes = saved ? JSON.parse(saved) : [];
+    console.log('Loaded classes:', classes);
 }
 
 // Render all classes
 function renderClasses() {
     const container = document.getElementById('classesContainer');
+    
+    if (!container) {
+        console.error('Classes container not found!');
+        return;
+    }
     
     if (classes.length === 0) {
         container.innerHTML = `
@@ -91,11 +110,42 @@ function renderClasses() {
                 </div>
                 <div class="class-card-footer">
                     <button class="join-class-btn" onclick="joinClass(${cls.id})">🎥 Join Class</button>
+                    <button class="share-class-btn" onclick="getShareLink(${cls.id})">📤 Share</button>
                     <button class="delete-class-btn" onclick="deleteClass(${cls.id})">🗑️ Delete</button>
                 </div>
             </div>
         `;
     }).join('');
+}
+
+// Get share link for a class
+function getShareLink(classId) {
+    const classItem = classes.find(c => c.id === classId);
+    if (!classItem) {
+        alert('Class not found!');
+        return;
+    }
+
+    const shareUrl = window.location.origin + window.location.pathname + '?joinClass=' + classId;
+    document.getElementById('shareLink').value = shareUrl;
+    document.getElementById('shareLinkContainer').style.display = 'block';
+    
+    console.log('Share link:', shareUrl);
+}
+
+// Copy share link to clipboard
+function copyShareLink() {
+    const shareLink = document.getElementById('shareLink');
+    shareLink.select();
+    document.execCommand('copy');
+    alert('✅ Link copied to clipboard!');
+}
+
+// Share to WhatsApp
+function shareToWhatsApp() {
+    const shareLink = document.getElementById('shareLink').value;
+    const message = encodeURIComponent(`🎓 Join our Target Y Live Class!\n\n${shareLink}`);
+    window.open(`https://wa.me/?text=${message}`, '_blank');
 }
 
 // Join a class via Jitsi
@@ -109,90 +159,101 @@ function joinClass(classId) {
     currentClassId = classId;
     
     // Hide classes list, show video section
-    document.querySelector('.classes-section').style.display = 'none';
+    document.getElementById('classesManagementSection').style.display = 'none';
     document.getElementById('videoSection').style.display = 'block';
+    document.getElementById('shareLinkContainer').style.display = 'none';
 
     // Update class info
-    document.getElementById('liveClassName').textContent = `📚 ${classItem.name}`;
-    document.getElementById('liveInstructor').textContent = `👨‍🏫 Instructor: ${classItem.instructor}`;
+    document.getElementById('liveClassName').textContent = `📚 ${classItem.name} - ${classItem.topic}`;
 
     // Initialize Jitsi Meet
     initJitsi(classItem.roomName);
+    
+    console.log('Joining class:', classItem);
 }
 
 // Initialize Jitsi Meet
 function initJitsi(roomName) {
     const domain = 'meet.jitsi.org';
+    
+    // Clear container first
+    const container = document.getElementById('jitsi-container');
+    container.innerHTML = '';
+    
+    console.log('Initializing Jitsi with room:', roomName);
+
     const options = {
         roomName: roomName,
         width: '100%',
         height: '100%',
         parentNode: document.querySelector('#jitsi-container'),
         configOverwrite: {
-            startWithAudioMuted: true,
+            startWithAudioMuted: false,
             startWithVideoMuted: false,
             disableSimulcast: false,
             enableLipSync: true,
-            enableNoisyMicDetection: true,
-            defaultLanguage: 'en',
             p2p: {
                 enabled: true,
                 preferredCodec: 'VP9'
+            },
+            constraints: {
+                video: {
+                    height: {
+                        ideal: 720,
+                        max: 720,
+                        min: 180
+                    }
+                },
+                audio: true
             }
         },
         interfaceConfigOverwrite: {
             DEFAULT_BACKGROUND: '#0a0f0a',
+            DISABLE_VIDEO_BACKGROUND: false,
             TOOLBAR_BUTTONS: [
                 'microphone',
                 'camera',
                 'closedcaptions',
                 'desktop',
                 'fullscreen',
-                'fodeviceselection',
                 'hangup',
                 'chat',
-                'recording',
-                'livestreaming',
-                'etherpad',
-                'settings',
                 'raisehand',
                 'videoquality',
                 'filmstrip',
                 'invite',
-                'feedback',
-                'stats',
-                'shortcuts',
-                'tileview',
-                'download',
-                'profile',
                 'help'
             ],
             SHOW_JITSI_WATERMARK: false,
             MOBILE_APP_PROMO: false,
-            HIDE_INVITE_MORE_HEADER: false,
-            LANG_DETECTION: true,
-            SHOW_WATERMARK_FOR_GUESTS: false,
-            ENABLE_FEEDBACK_ANIMATION: false,
-            VERTICAL_FILMSTRIP: true,
-            FILMSTRIP_MAXHEIGHT: 120,
-            SETTINGS_SECTIONS: ['language', 'devices', 'language', 'shortcuts', 'recognition'],
-            REMOTE_THUMBNAIL_RATIO_COMPUTE: 'remote'
+            VERTICAL_FILMSTRIP: false,
+            SHOW_POWERED_BY: false
         },
         userInfo: {
             displayName: 'Target Y Student'
         }
     };
 
-    // Create Jitsi API instance
-    jitsiApi = new JitsiMeetExternalAPI(domain, options);
+    try {
+        // Create Jitsi API instance
+        if (typeof JitsiMeetExternalAPI !== 'undefined') {
+            jitsiApi = new JitsiMeetExternalAPI(domain, options);
 
-    // Handle events
-    jitsiApi.addEventListener('participantJoined', onParticipantJoined);
-    jitsiApi.addEventListener('participantLeft', onParticipantLeft);
-    jitsiApi.addEventListener('videoConferenceLeft', onVideoConferenceLeft);
-    jitsiApi.addEventListener('readyToClose', onReadyToClose);
+            // Handle events
+            jitsiApi.addEventListener('participantJoined', onParticipantJoined);
+            jitsiApi.addEventListener('participantLeft', onParticipantLeft);
+            jitsiApi.addEventListener('videoConferenceLeft', onVideoConferenceLeft);
+            jitsiApi.addEventListener('readyToClose', onReadyToClose);
 
-    console.log('✅ Jitsi Meet initialized. Room:', roomName);
+            console.log('✅ Jitsi Meet initialized successfully');
+        } else {
+            console.error('JitsiMeetExternalAPI not loaded');
+            alert('Error loading video conference. Please refresh the page.');
+        }
+    } catch (error) {
+        console.error('Error initializing Jitsi:', error);
+        alert('Error initializing video conference: ' + error.message);
+    }
 }
 
 // Jitsi Event Handlers
@@ -209,24 +270,31 @@ function onVideoConferenceLeft() {
 }
 
 function onReadyToClose() {
+    console.log('Ready to close');
     leaveClass();
 }
 
 // Leave the class
 function leaveClass() {
+    console.log('Leaving class...');
+    
     if (jitsiApi) {
         jitsiApi.dispose();
         jitsiApi = null;
     }
 
     // Clear video container
-    document.getElementById('jitsi-container').innerHTML = '';
+    const container = document.getElementById('jitsi-container');
+    if (container) {
+        container.innerHTML = '';
+    }
 
     // Show classes list, hide video section
     document.getElementById('videoSection').style.display = 'none';
-    document.querySelector('.classes-section').style.display = 'block';
+    document.getElementById('classesManagementSection').style.display = 'block';
 
     currentClassId = null;
+    console.log('✅ Left class successfully');
 }
 
 // Delete a class
@@ -236,18 +304,26 @@ function deleteClass(classId) {
         saveClasses();
         renderClasses();
         alert('✅ Class deleted successfully!');
+        console.log('Class deleted:', classId);
     }
 }
 
-// Export classes data (for admin/analytics)
-function exportClassesData() {
-    const dataStr = JSON.stringify(classes, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'target-y-classes.json';
-    link.click();
-}
+// Check if joining from shared link
+window.addEventListener('load', function() {
+    const params = new URLSearchParams(window.location.search);
+    const joinClassId = params.get('joinClass');
+    
+    if (joinClassId) {
+        setTimeout(function() {
+            const classItem = classes.find(c => c.id == joinClassId);
+            if (classItem) {
+                joinClass(classItem.id);
+            } else {
+                alert('Class not found. It may have been deleted.');
+            }
+        }, 500);
+    }
+});
 
 console.log('🚀 Target Y Classes System Loaded - Ready for live sessions!');
+

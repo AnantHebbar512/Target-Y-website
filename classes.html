@@ -37,7 +37,7 @@
     </section>
 
     <!-- Classes Management Section -->
-    <section class="classes-section">
+    <section class="classes-section" id="classesManagementSection">
         <div class="container">
             <h2 class="section-title">Upcoming Classes</h2>
             
@@ -76,13 +76,16 @@
 
     <!-- Jitsi Meet Container (Hidden by default) -->
     <section id="videoSection" class="video-section" style="display: none;">
-        <div class="video-container">
-            <div id="jitsi-container"></div>
-            <div class="class-info">
-                <h2 id="liveClassName"></h2>
-                <p id="liveInstructor"></p>
-                <button class="leave-btn" onclick="leaveClass()">Leave Class</button>
-            </div>
+        <div class="video-header">
+            <h2 id="liveClassName"></h2>
+            <button class="leave-btn" onclick="leaveClass()">Leave Class</button>
+        </div>
+        <div id="jitsi-container" class="jitsi-container"></div>
+        <div class="share-link-container" id="shareLinkContainer" style="display: none;">
+            <p>Share this link with others:</p>
+            <input type="text" id="shareLink" readonly>
+            <button onclick="copyShareLink()" class="copy-btn">Copy Link</button>
+            <button onclick="shareToWhatsApp()" class="whatsapp-btn">Share to WhatsApp</button>
         </div>
     </section>
 
@@ -91,6 +94,7 @@
         <p>&copy; 2025 Target Y - Live Learning Community. All rights reserved.</p>
     </footer>
 
+    <script src='https://meet.jitsi.org/external_api.js'></script>
     <script src="classes-script.js"></script>
 </body>
 </html>

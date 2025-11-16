@@ -201,6 +201,25 @@
     box-shadow: 0 5px 15px rgba(0, 255, 65, 0.5);
 }
 
+.share-class-btn {
+    background: var(--gradient-tech);
+    color: var(--dark-bg);
+    border: 2px solid var(--neon-green);
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.share-class-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 65, 0.5);
+}
+
 .delete-class-btn {
     background: transparent;
     color: #ff6b6b;
@@ -225,70 +244,100 @@
 .video-section {
     min-height: 100vh;
     background: var(--dark-bg);
-    padding: 2rem;
+    padding: 0;
     margin-top: 60px;
-}
-
-.video-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2rem;
-    height: calc(100vh - 200px);
-}
-
-#jitsi-container {
-    background: black;
-    border: 2px solid rgba(0, 255, 65, 0.3);
-    border-radius: 0;
-    height: 100%;
-    box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
-}
-
-.class-info {
-    background: var(--card-bg);
-    border: 2px solid rgba(0, 255, 65, 0.3);
-    border-radius: 0;
-    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 }
 
-.class-info h2 {
+.video-header {
+    background: var(--card-bg);
+    border-bottom: 2px solid rgba(0, 255, 65, 0.3);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.video-header h2 {
     color: var(--neon-green);
-    font-size: 1.2rem;
-    margin: 0 0 1rem 0;
+    margin: 0;
     text-transform: uppercase;
     letter-spacing: 1px;
-    word-break: break-word;
+    flex: 1;
 }
 
-.class-info p {
+.jitsi-container {
+    flex: 1;
+    background: black;
+    border: none;
+    min-height: calc(100vh - 200px);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.jitsi-container iframe {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+}
+
+.share-link-container {
+    background: var(--card-bg);
+    border-top: 2px solid rgba(0, 255, 65, 0.3);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.share-link-container p {
+    margin: 0;
+    color: var(--neon-green);
+    font-weight: 600;
+}
+
+.share-link-container input {
+    flex: 1;
+    padding: 0.8rem;
+    background: rgba(0, 255, 65, 0.05);
+    border: 2px solid rgba(0, 255, 65, 0.2);
     color: var(--text-light);
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
+    border-radius: 0;
+    min-width: 250px;
 }
 
-.leave-btn {
-    background: #ff6b6b;
-    color: white;
-    border: 2px solid #ff6b6b;
-    padding: 0.8rem 1rem;
-    font-size: 0.9rem;
+.copy-btn,
+.whatsapp-btn {
+    padding: 0.8rem 1.5rem;
+    background: var(--gradient-tech);
+    color: var(--dark-bg);
+    border: 2px solid var(--neon-green);
     border-radius: 0;
     cursor: pointer;
-    transition: all 0.3s ease;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
 }
 
-.leave-btn:hover {
-    background: transparent;
-    color: #ff6b6b;
-    box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+.copy-btn:hover,
+.whatsapp-btn:hover {
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+    transform: translateY(-2px);
+}
+
+.whatsapp-btn {
+    background: #25D366;
+    border-color: #25D366;
+}
+
+.whatsapp-btn:hover {
+    box-shadow: 0 0 15px rgba(37, 211, 102, 0.5);
 }
 
 /* Empty State */
@@ -305,17 +354,27 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-    .video-container {
-        grid-template-columns: 1fr;
+    .video-header {
+        flex-wrap: wrap;
     }
 
-    .class-info {
-        height: auto;
-        min-height: 150px;
+    .jitsi-container {
+        min-height: 500px;
     }
 
-    #jitsi-container {
-        height: 400px;
+    .share-link-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .share-link-container input {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .copy-btn,
+    .whatsapp-btn {
+        width: 100%;
     }
 }
 
