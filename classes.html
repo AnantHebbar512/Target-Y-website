@@ -109,9 +109,8 @@
         <p>&copy; 2025 Target Y - Live Learning Community</p>
     </footer>
 
-    <script src='https://meet.jitsi.org/external_api.js'></script>
     <script>
-        let api = null;
+        let api = null; // retained for compatibility but not used with iframe embed
         let classes = [];
 
         // Load classes
@@ -189,55 +188,60 @@
             setTimeout(() => initJitsi(cls.roomName), 300);
         }
 
-        // Initialize Jitsi
+        // Initialize Jitsi using a plain iframe (more reliable across hosts)
         function initJitsi(roomName) {
             const container = document.getElementById('jitsi-container');
             container.innerHTML = '';
 
-            const options = {
-                roomName: roomName,
-                width: '100%',
-                height: '100%',
-                parentNode: container,
-                configOverwrite: {
-                    startWithAudioMuted: false,
-                    startWithVideoMuted: false,
-                    prejoinPageEnabled: false
-                },
-                interfaceConfigOverwrite: {
-                    TOOLBAR_BUTTONS: [
-                        'microphone', 'camera', 'closedcaptions', 'desktop', 
-                        'fullscreen', 'hangup', 'chat', 'raisehand', 'videoquality', 
-                        'filmstrip', 'help'
-                    ],
-                    SHOW_JITSI_WATERMARK: false
-                }
-            };
+            // Use meet.jit.si direct room URL for an embedded iframe
+            // Provide config parameters in the URL hash for basic settings
+            const params = [];
+            params.push('config.prejoinPageEnabled=false');
+            params.push('config.startWithAudioMuted=false');
+            params.push('config.startWithVideoMuted=false');
+            const hash = params.join('&');
 
-            api = new JitsiMeetExternalAPI('meet.jitsi.org', options);
-            api.addEventListener('videoConferenceLeft', leaveClass);
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://meet.jit.si/${encodeURIComponent(roomName)}#${hash}`;
+            iframe.allow = 'camera; microphone; fullscreen; display-capture';
+            iframe.style.border = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.loading = 'lazy';
+
+            container.appendChild(iframe);
+            // Note: iframe approach doesn't expose the JS API for toolbar events.
         }
 
-        // Leave class
+        // Leave class (remove iframe and restore UI)
         function leaveClass() {
-            if (api) {
-                api.dispose();
-                api = null;
-            }
+            const container = document.getElementById('jitsi-container');
+            container.innerHTML = '';
+            api = null;
             document.getElementById('videoArea').classList.remove('active');
             document.getElementById('mainContent').style.display = 'block';
         }
 
-        // Share class
-        function shareClass(classId) {
+        // Share class - provide direct Jitsi meeting URL (reliable for WhatsApp)
+        async function shareClass(classId) {
             const cls = classes.find(c => c.id === classId);
-            const url = window.location.origin + window.location.pathname + '?join=' + classId;
-            const msg = '🎓 Join our Target Y class!\n' + cls.name + '\n\n' + url;
-            
+            const jitsiUrl = 'https://meet.jit.si/' + encodeURIComponent(cls.roomName);
+            const pageJoinUrl = window.location.origin + window.location.pathname + '?join=' + classId;
+            const msg = `🎓 Join our Target Y class!\n${cls.name} - ${cls.topic}\n\nDirect Meeting: ${jitsiUrl}\nOr open on our site: ${pageJoinUrl}`;
+
             if (navigator.share) {
-                navigator.share({ title: cls.name, text: msg });
-            } else {
-                alert('Share link:\n' + url);
+                try { await navigator.share({ title: cls.name, text: msg, url: jitsiUrl }); }
+                catch (e) { /* user cancelled */ }
+                return;
+            }
+
+            // Fallback: copy direct meeting URL to clipboard and show both links
+            try {
+                await navigator.clipboard.writeText(jitsiUrl);
+                alert('Direct meeting link copied to clipboard:\n' + jitsiUrl + '\n\nYou can also use this site join link:\n' + pageJoinUrl);
+            } catch (e) {
+                // If clipboard fails, show the links so user can copy manually
+                alert('Share links:\nDirect meeting: ' + jitsiUrl + '\nSite join link: ' + pageJoinUrl);
             }
         }
 
