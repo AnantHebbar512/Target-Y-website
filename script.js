@@ -75,3 +75,25 @@ document.querySelectorAll('.about-card, .feature-item').forEach(card => {
 });
 
 console.log('🚀 Welcome to Target Y - Student Community for Techies!');
+
+// Mobile navigation toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.createElement('button');
+    toggle.className = 'mobile-toggle';
+    toggle.innerText = 'Menu';
+    const navContainer = document.querySelector('.nav-container');
+    if (navContainer) navContainer.appendChild(toggle);
+
+    const navMenu = document.querySelector('.nav-menu');
+    toggle.addEventListener('click', function() {
+        if (!navMenu) return;
+        navMenu.classList.toggle('mobile-active');
+    });
+
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('.nav-menu a').forEach(a => {
+        a.addEventListener('click', () => {
+            if (navMenu) navMenu.classList.remove('mobile-active');
+        });
+    });
+});

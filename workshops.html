@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classes - Target Y Live Sessions</title>
+    <title>Workshops - Target Y Live Sessions</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .classes-section { padding: 5rem 2rem; background: linear-gradient(135deg, rgba(0, 26, 13, 0.3), rgba(10, 15, 10, 0.6)); }
@@ -55,24 +55,24 @@
         </div>
     </nav>
 
-    <!-- Classes Hero -->
+    <!-- Workshops Hero -->
     <section class="classes-hero">
         <div class="classes-hero-content">
-            <h1 class="hero-title">Live Classes</h1>
-            <p class="hero-subtitle">Real-Time Learning with Video, Screen Share & Chat</p>
+            <h1 class="hero-title">Live Workshops</h1>
+            <p class="hero-subtitle">Hands-on Workshops with Screen Share & Chat</p>
         </div>
     </section>
 
     <!-- Main Content -->
     <section class="classes-section" id="mainContent">
         <div class="container">
-            <h2 class="section-title">📚 Upcoming Classes</h2>
+            <h2 class="section-title">🛠️ Upcoming Workshops</h2>
             
             <div class="create-class-container">
-                <h3>Create New Class</h3>
+                <h3>Create New Workshop</h3>
                 <form id="classForm">
                     <div class="form-group">
-                        <input type="text" id="className" placeholder="Class Name" required>
+                        <input type="text" id="className" placeholder="Workshop Name" required>
                     </div>
                     <div class="form-group">
                         <input type="text" id="instructorName" placeholder="Instructor Name" required>
@@ -86,12 +86,12 @@
                     <div class="form-group">
                         <textarea id="description" placeholder="Description" rows="2"></textarea>
                     </div>
-                    <button type="submit" class="join-btn">Create Class</button>
+                    <button type="submit" class="join-btn">Create Workshop</button>
                 </form>
             </div>
 
             <div>
-                <h3 style="color: var(--neon-green); margin: 2rem 0 1rem 0; text-transform: uppercase;">Available Classes</h3>
+                <h3 style="color: var(--neon-green); margin: 2rem 0 1rem 0; text-transform: uppercase;">Available Workshops</h3>
                 <div id="classesList" class="classes-grid"></div>
             </div>
         </div>
@@ -100,8 +100,8 @@
     <!-- Video Area -->
     <div id="videoArea">
         <div class="video-header">
-            <h2 id="classTitle">Class</h2>
-            <button class="btn-leave" onclick="leaveClass()">Leave Class</button>
+            <h2 id="classTitle">Workshop</h2>
+            <button class="btn-leave" onclick="leaveClass()">Leave Workshop</button>
         </div>
         <div id="jitsi-container" class="jitsi-container"></div>
     </div>
@@ -127,33 +127,39 @@
             localStorage.setItem('targetYClasses', JSON.stringify(classes));
         }
 
-        // Create class
-        document.getElementById('classForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const newClass = {
-                id: Date.now(),
-                name: document.getElementById('className').value,
-                instructor: document.getElementById('instructorName').value,
-                topic: document.getElementById('topic').value,
-                dateTime: document.getElementById('classDateTime').value,
-                description: document.getElementById('description').value,
-                roomName: 'TargetY-' + Date.now()
-            };
+        // Create class/workshop
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('classForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const newClass = {
+                        id: Date.now(),
+                        name: document.getElementById('className').value,
+                        instructor: document.getElementById('instructorName').value,
+                        topic: document.getElementById('topic').value,
+                        dateTime: document.getElementById('classDateTime').value,
+                        description: document.getElementById('description').value,
+                        roomName: 'TargetY-' + Date.now()
+                    };
 
-            classes.push(newClass);
-            saveClasses();
-            renderClasses();
-            this.reset();
-            alert('✅ Class created!');
+                    classes.push(newClass);
+                    saveClasses();
+                    renderClasses();
+                    this.reset();
+                    alert('✅ Workshop created!');
+                });
+            }
+
+            loadClasses();
         });
 
-        // Render classes
+        // Render classes/workshops
         function renderClasses() {
             const list = document.getElementById('classesList');
-            
+            if (!list) return;
             if (classes.length === 0) {
-                list.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><h4>No classes yet</h4><p>Create one above!</p></div>';
+                list.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><h4>No workshops yet</h4><p>Create one above!</p></div>';
                 return;
             }
 
@@ -177,32 +183,24 @@
             }).join('');
         }
 
-        // Join class
+        // Join
         function joinClass(classId) {
             const cls = classes.find(c => c.id === classId);
             if (!cls) return;
-
-            document.getElementById('classTitle').textContent = '📚 ' + cls.name + ' - ' + cls.topic;
+            document.getElementById('classTitle').textContent = '🔧 ' + cls.name + ' - ' + cls.topic;
             document.getElementById('mainContent').style.display = 'none';
             document.getElementById('videoArea').classList.add('active');
-
-            // Initialize Jitsi
             setTimeout(() => initJitsi(cls.roomName), 300);
         }
 
-        // Initialize Jitsi using a plain iframe (more reliable across hosts)
         function initJitsi(roomName) {
             const container = document.getElementById('jitsi-container');
             container.innerHTML = '';
-
-            // Use meet.jit.si direct room URL for an embedded iframe
-            // Provide config parameters in the URL hash for basic settings
             const params = [];
             params.push('config.prejoinPageEnabled=false');
             params.push('config.startWithAudioMuted=false');
             params.push('config.startWithVideoMuted=false');
             const hash = params.join('&');
-
             const iframe = document.createElement('iframe');
             iframe.src = `https://meet.jit.si/${encodeURIComponent(roomName)}#${hash}`;
             iframe.allow = 'camera; microphone; fullscreen; display-capture';
@@ -210,12 +208,9 @@
             iframe.style.width = '100%';
             iframe.style.height = '100%';
             iframe.loading = 'lazy';
-
             container.appendChild(iframe);
-            // Note: iframe approach doesn't expose the JS API for toolbar events.
         }
 
-        // Leave class (remove iframe and restore UI)
         function leaveClass() {
             const container = document.getElementById('jitsi-container');
             container.innerHTML = '';
@@ -224,30 +219,13 @@
             document.getElementById('mainContent').style.display = 'block';
         }
 
-        // Share class - provide direct Jitsi meeting URL (reliable for WhatsApp)
         async function shareClass(classId) {
             const cls = classes.find(c => c.id === classId);
             const jitsiUrl = 'https://meet.jit.si/' + encodeURIComponent(cls.roomName);
-            const pageJoinUrl = window.location.origin + window.location.pathname + '?join=' + classId;
-            const msg = `🎓 Join our Target Y class!\n${cls.name} - ${cls.topic}\n\nDirect Meeting: ${jitsiUrl}\nOr open on our site: ${pageJoinUrl}`;
-
-            if (navigator.share) {
-                try { await navigator.share({ title: cls.name, text: msg, url: jitsiUrl }); }
-                catch (e) { /* user cancelled */ }
-                return;
-            }
-
-            // Fallback: copy direct meeting URL to clipboard and show both links
-            try {
-                await navigator.clipboard.writeText(jitsiUrl);
-                alert('Direct meeting link copied to clipboard:\n' + jitsiUrl + '\n\nYou can also use this site join link:\n' + pageJoinUrl);
-            } catch (e) {
-                // If clipboard fails, show the links so user can copy manually
-                alert('Share links:\nDirect meeting: ' + jitsiUrl + '\nSite join link: ' + pageJoinUrl);
-            }
+            try { await navigator.clipboard.writeText(jitsiUrl); alert('Link copied: ' + jitsiUrl); }
+            catch (e) { alert('Share link: ' + jitsiUrl); }
         }
 
-        // Delete class
         function deleteClass(classId) {
             if (confirm('Delete?')) {
                 classes = classes.filter(c => c.id !== classId);
@@ -256,9 +234,8 @@
             }
         }
 
-        // Auto-join from link
+        // Auto-join
         window.addEventListener('load', function() {
-            loadClasses();
             const params = new URLSearchParams(window.location.search);
             const joinId = params.get('join');
             if (joinId) {
